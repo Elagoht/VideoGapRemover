@@ -1,5 +1,5 @@
-#!/usr/bin/python3
-from PyQt5.QtWidgets import QApplication, QFileDialog, QLineEdit, QMainWindow, QSpinBox, QWidget, QGroupBox, QPushButton, QLabel, QGridLayout
+#!/bin/env python3
+from PyQt5.QtWidgets import QApplication, QFileDialog, QLineEdit, QMainWindow, QSpinBox, QWidget, QGroupBox, QPushButton, QLabel, QGridLayout, QStatusBar
 from PyQt5.QtGui import  QKeySequence
 from sys import argv,exit
 from os import system
@@ -31,7 +31,9 @@ class MainWin(QMainWindow):
     def __init__(self):
         super(MainWin,self).__init__()
         self.show()
-        self.setFixedSize(360,400)
+        self.setFixedSize(400,self.minimumHeight())
+        self.l_status=QStatusBar()
+        self.setStatusBar(self.l_status)
         self.central=Central()
         self.setCentralWidget(self.central)
 
@@ -40,75 +42,89 @@ class Central(QWidget):
         super(Central,self).__init__()
         self.layout=QGridLayout(self)
 
-        self.boxFileSelect=QGroupBox("File Selection",self)
-        self.layFileSelect=QGridLayout(self.boxFileSelect)
+        self.box_file_select=QGroupBox("File Selection",self)
+        self.lay_file_select=QGridLayout(self.box_file_select)
 
-        self.lDescription=QLabel("Pick or drag and drop a file to start.")
-        self.lDescription.setWordWrap(True)
-        self.bSelect=QPushButton("Select File",self)
-        self.eFileName=QLineEdit("Not Selected.")
-        self.eFileName.setDisabled(True)
-        self.eFileName.setStyleSheet("color:black;")
+        self.l_description=QLabel("Pick or drag and drop a file to start.")
+        self.l_description.setWordWrap(True)
+        self.b_input_select=QPushButton("Select File",self)
+        self.e_input_file_name=QLineEdit("Not Selected.")
+        self.e_input_file_name.setDisabled(True)
+        self.e_input_file_name.setStyleSheet("color:black;")
 
-        self.layFileSelect.addWidget(self.lDescription,0,0,1,3)
-        self.layFileSelect.addWidget(self.bSelect,1,0)
-        self.layFileSelect.addWidget(self.eFileName,1,1,1,2)
+        self.lay_file_select.addWidget(self.l_description,0,0,1,3)
+        self.lay_file_select.addWidget(self.b_input_select,1,0)
+        self.lay_file_select.addWidget(self.e_input_file_name,1,1,1,2)
 
-        self.boxSettings=QGroupBox("Settings",self)
-        self.laySettings=QGridLayout(self.boxSettings)
+        self.box_settings=QGroupBox("Settings",self)
+        self.lay_settings=QGridLayout(self.box_settings)
 
-        self.lTreshold=QLabel("Audio Trashold (db)")
-        self.sTreshold=QSpinBox()
-        self.sTreshold.setRange(-50,50)
-        self.sTreshold.setValue(-16)
-        self.lMinSilence=QLabel("Minimum Silence Length (ms)")
-        self.sMinSilence=QSpinBox()
-        self.sMinSilence.setSingleStep(100)
-        self.sMinSilence.setRange(500,10000)
-        self.lKeepSilence=QLabel("Keep Silence (ms)")
-        self.sKeepSilence=QSpinBox()
-        self.sKeepSilence.setRange(100,10000)
-        self.sKeepSilence.setSingleStep(100)
-        self.descKeepSilence=QLabel("Automatically sets half of minimum silence length if more than half.")
-        self.descKeepSilence.setWordWrap(True)
-        self.descKeepSilence.setStyleSheet("color:gray;font-size:9pt;")
+        self.l_treshold=QLabel("Audio Trashold (db)")
+        self.s_treshold=QSpinBox()
+        self.s_treshold.setRange(-50,50)
+        self.s_treshold.setValue(-16)
+        self.l_min_silence=QLabel("Minimum Silence Length (ms)")
+        self.s_min_silence=QSpinBox()
+        self.s_min_silence.setSingleStep(100)
+        self.s_min_silence.setRange(500,10000)
+        self.l_keep_silence=QLabel("Keep Silence (ms)")
+        self.s_keep_silence=QSpinBox()
+        self.s_keep_silence.setRange(100,10000)
+        self.s_keep_silence.setSingleStep(100)
+        self.desc_keep_silence=QLabel("Automatically sets half of minimum silence length if more than half.")
+        self.desc_keep_silence.setWordWrap(True)
+        self.desc_keep_silence.setStyleSheet("color:gray;font-size:9pt;")
 
-        self.laySettings.addWidget(self.lTreshold)
-        self.laySettings.addWidget(self.sTreshold)
-        self.laySettings.addWidget(self.lMinSilence)
-        self.laySettings.addWidget(self.sMinSilence)
-        self.laySettings.addWidget(self.lKeepSilence)
-        self.laySettings.addWidget(self.sKeepSilence)
-        self.laySettings.addWidget(self.descKeepSilence)
+        self.lay_settings.addWidget(self.l_treshold)
+        self.lay_settings.addWidget(self.s_treshold)
+        self.lay_settings.addWidget(self.l_min_silence)
+        self.lay_settings.addWidget(self.s_min_silence)
+        self.lay_settings.addWidget(self.l_keep_silence)
+        self.lay_settings.addWidget(self.s_keep_silence)
+        self.lay_settings.addWidget(self.desc_keep_silence)
+        
+        self.box_convert=QGroupBox("Convert",self)
+        self.lay_convert=QGridLayout(self.box_convert)
 
-        self.bConvert=QPushButton("Convert",self)
-        self.lStatus=QLabel()
+        self.b_output_select=QPushButton("Select File",self)
+        self.e_output_file_name=QLineEdit("Not Selected.")
+        self.e_output_file_name.setDisabled(True)
+        self.e_output_file_name.setStyleSheet("color:black;")
+        self.b_convert=QPushButton("Start",self)
 
-        self.layout.addWidget(self.boxFileSelect,0,0,1,3)
-        self.layout.addWidget(self.boxSettings,1,0,1,3)
-        self.layout.addWidget(self.bConvert,2,1)
-        self.layout.addWidget(self.lStatus,3,0,1,3)
+        self.lay_convert.addWidget(self.b_output_select,0,0,1,1)
+        self.lay_convert.addWidget(self.e_output_file_name,0,1,1,1)
+        self.lay_convert.addWidget(self.b_convert,1,0,1,2)
 
-        self.file=""
+        self.layout.addWidget(self.box_file_select,0,0,1,3)
+        self.layout.addWidget(self.box_settings,1,0,1,3)
+        self.layout.addWidget(self.box_convert,2,1)
 
-        self.bSelect.clicked.connect(self.selectFile)
-        self.bSelect.setShortcut(QKeySequence("Ctrl+O"))
-        self.eFileName.textChanged.connect(self.canConvert)
-        self.bConvert.clicked.connect(lambda:convert(self.file,self.sTreshold.value(),self.sMinSilence.value(),self.sKeepSilence.value()))
-        self.canConvert()
+        self.input_file=""
+        self.output_file=""
 
-    def selectFile(self):
+        self.b_input_select.clicked.connect(self.select_input_file)
+        self.b_input_select.setShortcut(QKeySequence("Ctrl+O"))
+        self.e_input_file_name.textChanged.connect(self.can_convert)
+        self.b_convert.clicked.connect(lambda:convert(self.input_file,self.s_treshold.value(),self.s_min_silence.value(),self.s_keep_silence.value()))
+        self.can_convert()
+
+    def select_input_file(self):
         file=QFileDialog.getOpenFileName(self,"Select File","","",options=QFileDialog.DontUseNativeDialog)
-        self.file=file[0]
-        self.eFileName.setText(file[0].split("/")[-1] if file[0] else "Not Selected.")
+        self.input_file=file[0]
+        self.e_input_file_name.setText(file[0].split("/")[-1] if file[0] else "Not Selected.")
 
-    def canConvert(self):
-        state=self.eFileName.text()=="Not Selected."
-        self.bConvert.setDisabled(state)
-        if state:
-            self.lStatus.setText(messages["select"])
-        else:
-            self.lStatus.setText(messages["ready"])
+    def select_output_file(self):
+        file=QFileDialog.getOpenFileName(self,"Select File","","",options=QFileDialog.DontUseNativeDialog)
+        self.output_file=file[0]
+        if "." in self.input_file:
+            if self.output_file.endswith("."+self.input_file.split(".")[-1]):
+                self.output_file+="."+self.input_file.split(".")[-1]
+        self.e_output_file_name.setText(file[0].split("/")[-1] if file[0] else "Not Selected.")
+
+    def can_convert(self):
+        state=self.e_input_file_name.text()=="Not Selected."
+        self.b_convert.setDisabled(state)
 
 app=QApplication(argv)
 app.setApplicationName("Video Gap Remover")
