@@ -20,12 +20,13 @@ def convert(inp:str,tsh:int,slen:int,kpt:int):
     nogap=silence.detect_nonsilent(audio, min_silence_len=slen, silence_thresh=audio.dBFS-16)
     nogap=[((start-kpt)/1000 if (start-kpt)/1000>0 else 0,(stop+kpt)/1000 if (stop+kpt)/1000<len(audio) else len(audio)) for start,stop in nogap]
     print(nogap)
-    for i in range(len(nogap)):
-        print(f"ffmpeg -i {inp} -ss {nogap[i][0]} -to {nogap[i][1]} -async 1 -c copy {out}/cut{i}.mp4")
-        system(f"ffmpeg -i {inp} -ss {nogap[i][0]} -to {nogap[i][1]} -async 1 -c copy {out}/cut{i}.mp4")
-    with open(out+"/cuts.list","w") as file: file.writelines(f"file 'cut{i}.mp4'\n" for i in range(len(nogap)))
-    system(f"ffmpeg -f concat -i {out}/cuts.list -c copy {out}/output.mp4")
-    print(nogap)
+    times=""
+    for part in nogap:
+        times+=f"+between(t,{part[0]},{part[1]})"
+    times=times[1:]
+    ffmpeg=f"""ffmpeg -i {inp} -vf "select='{times}', setpts=N/FRAME_RATE/TB\" -af "aselect='{times}', asetpts=N/SR/TB" -y out.mp4"""
+    system(ffmpeg)
+    print(ffmpeg)
 
 class MainWin(QMainWindow):
     def __init__(self):
